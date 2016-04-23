@@ -79,6 +79,7 @@ public class User {
     /**
      * Returns true if the nick represented by this User object is the same
      * as the argument. A case insensitive comparison is made.
+     * @param nick The user nick to compare to.
      * 
      * @return true if the nicks are identical (case insensitive).
      */
@@ -91,6 +92,7 @@ public class User {
      * Returns true if the nick represented by this User object is the same
      * as the nick of the User object given as an argument.
      * A case insensitive comparison is made.
+     * @param o The user object to compare to.
      * 
      * @return true if o is a User object with a matching lowercase nick.
      */
@@ -116,7 +118,8 @@ public class User {
     /**
      * Returns the result of calling the compareTo method on lowercased
      * nicks. This is useful for sorting lists of User objects.
-     * 
+     * @param o The user object to compare to.
+     *
      * @return the result of calling compareTo on lowercased nicks.
      */
     public int compareTo(Object o) {

@@ -25,78 +25,82 @@ public class DccManager {
         tokenizer.nextToken();
         String type = tokenizer.nextToken();
         String filename = tokenizer.nextToken();
-        
-        if (type.equals("SEND")) {
-            long address = Long.parseLong(tokenizer.nextToken());
-            int port = Integer.parseInt(tokenizer.nextToken());
-            long size = -1;
-            try {
-                size = Long.parseLong(tokenizer.nextToken());
+
+        switch (type) {
+            case "SEND": {
+                long address = Long.parseLong(tokenizer.nextToken());
+                int port = Integer.parseInt(tokenizer.nextToken());
+                long size = -1;
+                try {
+                    size = Long.parseLong(tokenizer.nextToken());
+                } catch (Exception e) {
+                    // Stick with the old value.
+                }
+
+                DccFileTransfer transfer = new DccFileTransfer(_bot, this, nick, login, hostname, type, filename, address, port, size);
+                _bot.onIncomingFileTransfer(transfer);
+
+                break;
             }
-            catch (Exception e) {
-                // Stick with the old value.
-            }
-            
-            DccFileTransfer transfer = new DccFileTransfer(_bot, this, nick, login, hostname, type, filename, address, port, size);
-            _bot.onIncomingFileTransfer(transfer);
-            
-        }
-        else if (type.equals("RESUME")) {
-            int port = Integer.parseInt(tokenizer.nextToken());
-            long progress = Long.parseLong(tokenizer.nextToken());
-            
-            DccFileTransfer transfer = null;
-            synchronized (_awaitingResume) {
-                for (int i = 0; i < _awaitingResume.size(); i++) {
-                    transfer = (DccFileTransfer) _awaitingResume.elementAt(i);
-                    if (transfer.getNick().equals(nick) && transfer.getPort() == port) {
-                        _awaitingResume.removeElementAt(i);
-                        break;
+            case "RESUME": {
+                int port = Integer.parseInt(tokenizer.nextToken());
+                long progress = Long.parseLong(tokenizer.nextToken());
+
+                DccFileTransfer transfer = null;
+                synchronized (_awaitingResume) {
+                    for (int i = 0; i < _awaitingResume.size(); i++) {
+                        transfer = (DccFileTransfer) _awaitingResume.elementAt(i);
+                        if (transfer.getNick().equals(nick) && transfer.getPort() == port) {
+                            _awaitingResume.removeElementAt(i);
+                            break;
+                        }
                     }
                 }
+
+                if (transfer != null) {
+                    transfer.setProgress(progress);
+                    _bot.sendCTCPCommand(nick, "DCC ACCEPT file.ext " + port + " " + progress);
+                }
+
+                break;
             }
-            
-            if (transfer != null) {
-                transfer.setProgress(progress);
-                _bot.sendCTCPCommand(nick, "DCC ACCEPT file.ext " + port + " " + progress);
-            }
-            
-        }
-        else if (type.equals("ACCEPT")) {
-            int port = Integer.parseInt(tokenizer.nextToken());
-            @SuppressWarnings("unused")
-			long progress = Long.parseLong(tokenizer.nextToken());
-            
-            DccFileTransfer transfer = null;
-            synchronized (_awaitingResume) {
-                for (int i = 0; i < _awaitingResume.size(); i++) {
-                    transfer = (DccFileTransfer) _awaitingResume.elementAt(i);
-                    if (transfer.getNick().equals(nick) && transfer.getPort() == port) {
-                        _awaitingResume.removeElementAt(i);
-                        break;
+            case "ACCEPT": {
+                int port = Integer.parseInt(tokenizer.nextToken());
+                @SuppressWarnings("unused")
+                long progress = Long.parseLong(tokenizer.nextToken());
+
+                DccFileTransfer transfer = null;
+                synchronized (_awaitingResume) {
+                    for (int i = 0; i < _awaitingResume.size(); i++) {
+                        transfer = (DccFileTransfer) _awaitingResume.elementAt(i);
+                        if (transfer.getNick().equals(nick) && transfer.getPort() == port) {
+                            _awaitingResume.removeElementAt(i);
+                            break;
+                        }
                     }
                 }
-            }
-            
-            if (transfer != null) {
-                transfer.doReceive(transfer.getFile(), true);
-            }
-            
-        }
-        else if (type.equals("CHAT")) {
-            long address = Long.parseLong(tokenizer.nextToken());
-            int port = Integer.parseInt(tokenizer.nextToken());
-            
-            final DccChat chat = new DccChat(_bot, nick, login, hostname, address, port);
-            
-            new Thread() {
-                public void run() {
-                    _bot.onIncomingChatRequest(chat);
+
+                if (transfer != null) {
+                    transfer.doReceive(transfer.getFile(), true);
                 }
-            }.start();
-        }
-        else {
-            return false;
+
+                break;
+            }
+            case "CHAT": {
+                long address = Long.parseLong(tokenizer.nextToken());
+                int port = Integer.parseInt(tokenizer.nextToken());
+
+                final DccChat chat = new DccChat(_bot, nick, login, hostname, address, port);
+
+                new Thread() {
+                    public void run() {
+                        _bot.onIncomingChatRequest(chat);
+                    }
+                }.start();
+                break;
+            }
+            default:
+                return false;
         }
         
         return true;
@@ -127,6 +131,6 @@ public class DccManager {
     
     private PircBot _bot;
     @SuppressWarnings("rawtypes")
-	private Vector _awaitingResume = new Vector();
+	private final Vector _awaitingResume = new Vector();
     
 }

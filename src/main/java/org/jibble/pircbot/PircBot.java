@@ -388,7 +388,7 @@ public abstract class PircBot implements ReplyConstants {
      *    sendMessage("Paul", "Hi");</pre>
      *
      * You may optionally apply colours, boldness, underlining, etc to
-     * the message by using the <code>Colors</code> class.
+     * the message by using the {@code Colors} class.
      *
      * @param target The name of the channel or user nick to send to.
      * @param message The message to send.
@@ -423,9 +423,9 @@ public abstract class PircBot implements ReplyConstants {
 
     /**
      * Sends a CTCP command to a channel or user.  (Client to client protocol).
-     * Examples of such commands are "PING <number>", "FINGER", "VERSION", etc.
+     * Examples of such commands are "PING", "FINGER", "VERSION", etc.
      * For example, if you wish to request the version of a user called "Dave",
-     * then you would call <code>sendCTCPCommand("Dave", "VERSION");</code>.
+     * then you would call {@code sendCTCPCommand("Dave", "VERSION");}.
      * The type of response to such commands is largely dependant on the target
      * client software.
      *
@@ -643,7 +643,7 @@ public abstract class PircBot implements ReplyConstants {
      * if you want it to do anything useful.
      *  <p>
      * Some IRC servers support certain parameters for LIST requests.
-     * One example is a parameter of ">10" to list only those channels
+     * One example is a parameter of "&#62;10" to list only those channels
      * that have more than 10 users in them.  Whether these parameters
      * are supported or not will depend on the IRC server software.
      *
@@ -688,17 +688,7 @@ public abstract class PircBot implements ReplyConstants {
         transfer.doSend(true);
         return transfer;
     }
-    
-    /**
-     * Receives a file that is being sent to us by a DCC SEND request.
-     * Please use the onIncomingFileTransfer method to receive files.
-     *
-     * @deprecated As of PircBot 1.2.0, use {@link #onIncomingFileTransfer(DccFileTransfer)}
-     */
-    protected final void dccReceiveFile(File file, long address, int port, int size) {
-        throw new RuntimeException("dccReceiveFile is deprecated, please use sendFile");
-    }
-    
+
     /**
      * Attempts to establish a DCC CHAT session with a client.  This method
      * issues the connection request to the client and then waits for the
@@ -774,16 +764,6 @@ public abstract class PircBot implements ReplyConstants {
         }
         return chat;
     }
-    
-    /**
-     * Attempts to accept a DCC CHAT request by a client.
-     * Please use the onIncomingChatRequest method to receive files.
-     *
-     * @deprecated As of PircBot 1.2.0, use {@link #onIncomingChatRequest(DccChat)}
-     */
-    protected final DccChat dccAcceptChatRequest(String sourceNick, long address, int port) {
-        throw new RuntimeException("dccAcceptChatRequest is deprecated, please use onIncomingChatRequest");
-    }
 
     /**
      * Adds a line to the log.  This log is currently output to the standard
@@ -794,7 +774,7 @@ public abstract class PircBot implements ReplyConstants {
      * represents the logging time (as the number of milliseconds since the
      * epoch).  This timestamp and the following log entry are separated by
      * a single space character, " ".  Outgoing messages are distinguishable
-     * by a log entry that has ">>>" immediately following the space character
+     * by a log entry that has "&#62;&#62;&#62;" immediately following the space character
      * after the timestamp.  DCC events use "+++" and warnings about unhandled
      * Exceptions and Errors use "###".
      *  <p>
@@ -1131,9 +1111,6 @@ public abstract class PircBot implements ReplyConstants {
             String topic = response.substring(colon + 1);
 
             _topics.put(channel, topic);
-
-            // For backwards compatibility only - this onTopic method is deprecated.
-            this.onTopic(channel, topic);
         }
         else if (code == RPL_TOPICINFO) {
             StringTokenizer tokenizer = new StringTokenizer(response);
@@ -1201,10 +1178,10 @@ public abstract class PircBot implements ReplyConstants {
      * For example, we can use this method to discover the topic of a
      * channel when we join it.  If we join the channel #test which
      * has a topic of &quot;I am King of Test&quot; then the response
-     * will be &quot;<code>PircBot #test :I Am King of Test</code>&quot;
+     * will be &quot;{@code PircBot #test :I Am King of Test}&quot;
      * with a code of 332 to signify that this is a topic.
      * (This is just an example - note that overriding the
-     * <code>onTopic</code> method is an easier way of finding the
+     * {@code onTopic} method is an easier way of finding the
      * topic for a channel). Check the IRC RFC for the full list of other
      * command response codes.
      *  <p>
@@ -1402,21 +1379,7 @@ public abstract class PircBot implements ReplyConstants {
      * @param reason The reason given for quitting the server.
      */
     protected void onQuit(String sourceNick, String sourceLogin, String sourceHostname, String reason) {}
-    
-    /**
-     * This method is called whenever a user sets the topic, or when
-     * PircBot joins a new channel and discovers its topic.
-     *  <p>
-     * The implementation of this method in the PircBot abstract class
-     * performs no actions and may be overridden as required.
-     *
-     * @param channel The channel that the topic belongs to.
-     * @param topic The topic for the channel.
-     *
-     * @deprecated As of 1.2.0, replaced by {@link #onTopic(String,String,String,long,boolean)}
-     */
-    protected void onTopic(String channel, String topic) {}
-    
+
     /**
      * This method is called whenever a user sets the topic, or when
      * PircBot joins a new channel and discovers its topic.
@@ -1827,7 +1790,7 @@ public abstract class PircBot implements ReplyConstants {
      * @param sourceNick The nick of the user that performed the mode change.
      * @param sourceLogin The login of the user that performed the mode change.
      * @param sourceHostname The hostname of the user that performed the mode change.
-     * @param hostmask
+     * @param hostmask The hostmask of the user that performed the mode change.
      */
     protected void onRemoveChannelBan(String channel, String sourceNick, String sourceLogin, String sourceHostname, String hostmask) {}
     
@@ -2071,25 +2034,7 @@ public abstract class PircBot implements ReplyConstants {
      */
     protected void onInvite(String targetNick, String sourceNick, String sourceLogin, String sourceHostname, String channel) {
     }
-    
-    /**
-     * This method used to be called when a DCC SEND request was sent to the PircBot.
-     * Please use the onIncomingFileTransfer method to receive files, as it
-     * has better functionality and supports resuming.
-     *
-     * @deprecated As of PircBot 1.2.0, use {@link #onIncomingFileTransfer(DccFileTransfer)}
-     */
-    protected void onDccSendRequest(String sourceNick, String sourceLogin, String sourceHostname, String filename, long address, int port, int size) {}
-    
-    /**
-     * This method used to be called when a DCC CHAT request was sent to the PircBot.
-     * Please use the onIncomingChatRequest method to accept chats, as it
-     * has better functionality.
-     *
-     * @deprecated As of PircBot 1.2.0, use {@link #onIncomingChatRequest(DccChat)}
-     */
-    protected void onDccChatRequest(String sourceNick, String sourceLogin, String sourceHostname, long address, int port) {}
-    
+
     /**
      * This method is called whenever a DCC SEND request is sent to the PircBot.
      * This means that a client has requested to send a file to us.
@@ -2729,13 +2674,13 @@ public abstract class PircBot implements ReplyConstants {
      * multiple server connectivity. The format of
      * this String may change between different versions of PircBot
      * but is currently something of the form
-     * <code>
+     * {@code
      *   Version{PircBot x.y.z Java IRC Bot - www.jibble.org}
      *   Connected{true}
      *   Server{irc.dal.net}
      *   Port{6667}
      *   Password{}
-     * </code>
+     * }
      *
      * @since PircBot 0.9.10
      *
@@ -2986,6 +2931,7 @@ public abstract class PircBot implements ReplyConstants {
             else {
                 // just in case ...
                 newUser = new User("", nick);
+                assert users != null;
                 users.put(newUser, newUser);
             }
         }

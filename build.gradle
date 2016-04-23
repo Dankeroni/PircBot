@@ -4,3 +4,24 @@ apply plugin: 'java'
 
 sourceCompatibility = 8
 
+task sourcesJar(type: Jar) {
+    from sourceSets.main.allJava.srcDirs
+    classifier = 'sources'
+}
+
+/*
+task javadoc(type: Javadoc) {
+    failOnError false
+    source = sourceSets.main.allJava
+}
+*/
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}

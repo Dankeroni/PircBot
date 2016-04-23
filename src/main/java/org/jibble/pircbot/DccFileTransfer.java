@@ -138,6 +138,7 @@ public class DccFileTransfer {
                 }
                 finally {
                     try {
+                        assert foutput != null;
                         foutput.close();
                         _socket.close();
                     }
@@ -249,6 +250,7 @@ public class DccFileTransfer {
                 }
                 finally {
                     try {
+                        assert finput != null;
                         finput.close();
                         _socket.close();
                     }
